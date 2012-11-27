@@ -17,13 +17,26 @@ require_once(DOKU_PLUGIN.'syntax.php');
 class helper_plugin_branches extends DokuWiki_Plugin {
 
     var $jira = null;
+    var $git = null;
     
     function helper_plugin_branches(){        
-        $this->jira =& plugin_load('helper', 'jira');
+        $this->jira =& plugin_load('helper', 'jiradata');
         if (is_null($this->jira)) {
-            msg('The branches plugin needs the the jira which cannot be loaded', -1);
+            msg('The branches plugin needs the jiradata plugin which cannot be loaded', -1);
             return false;
-        }        
+        }     
+        
+        $this->git =& plugin_load('helper', 'git');
+        if (is_null($this->git)) {
+            msg('The branches plugin needs the git plugin which cannot be loaded', -1);
+            return false;
+        }   
+    }
+    
+    function createBranch($branch_id)
+    {
+        $destination = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$branch_id;        
+        $this->git->cloneRepo($destination);        
     }
 
     function getBranches()

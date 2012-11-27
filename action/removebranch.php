@@ -18,13 +18,18 @@ class action_plugin_branches_removebranch extends DokuWiki_Action_Plugin {
     }
  
     function handle(&$event, $param){
+        global $conf;
+        
         $branch_id = $_GET['remove_branch'];
+        $redirect_url = $conf['plugin']['branch']['manage_branches_url'];
+        if ($redirect_url === '') $redirect_url = "/master"; 
+        
         if ($branch_id)
         {
             msg('Removed branch: '.$branch_id);
             $this->rrmdir($this->basePath.DIRECTORY_SEPARATOR.$branch_id);
             
-            ptln('<script>url="http://localhost:8030/master";setTimeout("location.href=url",15);</script>');
+            ptln('<script>url="'.$redirect_url.'";setTimeout("location.href=url",15);</script>');
         }
     }
     

@@ -22,7 +22,7 @@ class syntax_plugin_branches_manage extends DokuWiki_Syntax_Plugin {
         if (is_null($this->branch_helper)) {
             msg('The branches plugin needs the the branches helper which cannot be loaded', -1);
             return false;
-        }        
+        }                
     }
     
     /**
@@ -92,7 +92,8 @@ class syntax_plugin_branches_manage extends DokuWiki_Syntax_Plugin {
             $renderer->doc .=  "<tr><th>Improvement</th><th>Create</th><th>Edit</th><th>Remove</th></tr>";
             foreach ($improvements as $improvement)
             {
-                $ip_url = "http://jira.global.thenational.com/".$improvement["key"];
+                
+                $ip_url = $conf['jira_url'].$improvement["key"];
                 $go_to_branch_url = "/".$improvement["key"]."/doku.php";
                 $create_branch_url = "/master/doku.php?create_branch=".$improvement["key"];
                 $remove_branch_url = "/master/doku.php?remove_branch=".$improvement["key"];

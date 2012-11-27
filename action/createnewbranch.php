@@ -10,24 +10,28 @@ require_once DOKU_PLUGIN.'action.php';
 
 class action_plugin_branches_createnewbranch extends DokuWiki_Action_Plugin {
 
-    var $basePath = "";
+    var $branch_helper = null;
+    
+    function action_plugin_branches_createnewbranch(){        
+        $this->branch_helper =& plugin_load('helper', 'branches');
+        if (is_null($this->branch_helper)) {
+            msg('The branches plugin needs the the branches helper which cannot be loaded', -1);
+            return false;
+        }                
+    }
 
     function register(&$controller){
         $controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'handle', array());
-        $this->basePath = dirname(DOKU_INC);
     }
  
     function handle(&$event, $param){
         $branch_id = $_GET['create_branch'];
         if ($branch_id)
         {
+            $this->branch_helper->createBranch($branch_id);
             msg('Created branch: '.$branch_id);
-            $src = $this->basePath.DIRECTORY_SEPARATOR.'master';
-            $dst = $this->basePath.DIRECTORY_SEPARATOR.$branch_id;
             
-            $this->rcopy($src, $dst);
-            
-            ptln('<script>url="http://localhost:8030/'.$branch_id.'";setTimeout("location.href=url",15);</script>');
+            ptln('<script>url="/'.$branch_id.'";setTimeout("location.href=url",15);</script>');
         }
     }
     
