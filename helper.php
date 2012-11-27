@@ -28,7 +28,7 @@ class helper_plugin_branches extends DokuWiki_Plugin {
 
     function getBranches()
     {
-        $path = DOKU_INC; // Look at the root of this website
+        $path = dirname(DOKU_INC); // Look at the root of this website, which is one above this instance
         $fulldirs = glob($path.'/*', GLOB_ONLYDIR);
         
         $dirs = array();
