@@ -28,7 +28,7 @@ class helper_plugin_branches extends DokuWiki_Plugin {
 
     function getBranches()
     {
-        $path = "E:\\Stephan\\ALM Community\\Technical\\WebSites\\NAVIGATELibrary";
+        $path = DOKU_INC; // Look at the root of this website
         $fulldirs = glob($path.'/*', GLOB_ONLYDIR);
         
         $dirs = array();
@@ -56,6 +56,8 @@ class helper_plugin_branches extends DokuWiki_Plugin {
     
     function getInProgressInitiatives()
     {
+        if ($this->jira === null) return;
+        
         $improvements = $this->jira->getJiraData("");
         return $improvements;
     }
