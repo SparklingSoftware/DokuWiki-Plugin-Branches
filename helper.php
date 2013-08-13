@@ -35,43 +35,89 @@ class helper_plugin_branches extends DokuWiki_Plugin {
     
     function createBranch($branch_id)
     {
-        $destination = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$branch_id;        
-        $this->git->cloneRepo($destination);        
+        global $conf;
+        $this->getConf('');
+        $debug = false;
+
+        // Get config
+        $origin_wiki = $conf['plugin']['branches']['origin_wiki_dir'];
+        $origin_data = $conf['plugin']['branches']['origin_data_dir'];
+
+        // Clone wiki
+        $origin = '"'.dirname(DOKU_INC).DIRECTORY_SEPARATOR.$origin_wiki.'"';
+        $destination = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$branch_id;     
+        if ($debug) msg('Cloning from: '.$origin.' To: '.$destination);        
+        $this->git->cloneRepo($origin, $destination);    
+      
+        // Clone data
+        $origin = '"'.dirname(DOKU_INC).DIRECTORY_SEPARATOR.$origin_data.'"';
+        $destination = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$branch_id.'-Data';        
+        if ($debug) msg('Cloning from: '.$origin.' To: '.$destination);  
+        $this->git->cloneRepo($origin, $destination);    
+
+        // Apply config
+        $configDir = $conf['plugin']['branches']['config_dir'];        
+        $configfiles = array();
+        $configfiles[] = 'local.protected.php';
+        $configfiles[] = 'acl.auth.php';
+        $configfiles[] = 'local.php';
+        if ($debug) msg('Config dir: '.$configDir);  
+        foreach ($configfiles as $file)
+        {
+            $source = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$configDir.DIRECTORY_SEPARATOR.'conf'.DIRECTORY_SEPARATOR.$file;
+            $dest = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$branch_id.DIRECTORY_SEPARATOR.'conf'.DIRECTORY_SEPARATOR.$file;
+            if ($debug) msg('Copying configs from: '.$source.' To: '.$dest);  
+            copy($source, $dest);
+
+            if ($file === 'local.protected.php' ) {
+              if ($debug) msg('replace dest: '.$dest.' branch_id: '.$branch_id);
+              $this->replaceConfigSetting($dest, '<<WORKSPACE>>', $branch_id);
+            }
+        }        
+    }
+
+    function replaceConfigSetting($filename, $oldValue, $newValue)
+    {
+       //read the entire string
+       $str=implode("\n",file($filename));
+
+       $fp=fopen($filename,'w');
+       $str=str_replace($oldValue, $newValue, $str);
+
+       // rewrite the file
+       fwrite($fp,$str,strlen($str));
     }
 
     function getBranches()
     {
+        global $conf;
+        $this->getConf('');
+    
         $path = dirname(DOKU_INC); // Look at the root of this website, which is one above this instance
         $fulldirs = glob($path.'/*', GLOB_ONLYDIR);
         
         $dirs = array();
         foreach ($fulldirs as $dirname)
         {
+            $prefix = $conf['plugin']['branches']['branch_prefix'];   // for instance: "IP-"
             $dir = basename($dirname);
-            if (stripos($dir, 'IP-') !== 0) continue;
+            if (stripos($dir, $prefix) !== 0) continue;
+            if (stripos($dir, '-data') !== false) continue;
+
             array_push($dirs, $dir);
         }
         
         return $dirs;
     }
     
-    function getExistingBranches()
-    {
-        $branches = array();
-        
-        array_push(&$branches, "IP-165");
-        array_push(&$branches, "IP-501");
-        array_push(&$branches, "IP-502");
-        array_push(&$branches, "IP-503");
-        
-        return $branches;
-    }
-    
     function getInProgressInitiatives()
     {
+        global $conf;
+        $this->getConf('');
+
         if ($this->jira === null) return;
-        
-        $improvements = $this->jira->getJiraData('project = SEPG AND (status = "In Progress" or status = "Awaiting Signoff") ORDER BY key');
+        $jql = $conf['plugin']['branches']['jql'];
+        $improvements = $this->jira->getIssues($jql);
         return $improvements;
     }
 

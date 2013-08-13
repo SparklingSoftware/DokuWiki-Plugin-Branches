@@ -84,19 +84,36 @@ class syntax_plugin_branches_manage extends DokuWiki_Syntax_Plugin {
         global $INFO, $conf;
 
         if($format == 'xhtml'){
-
-            $improvements = $this->branch_helper->getInProgressInitiatives();
+        
+            try
+            {
+                $improvements = $this->branch_helper->getInProgressInitiatives();
+            }                    
+            catch(Exception $e)
+            {
+                msg($e->getMessage());
+            }
+            
+        
             $branches = $this->branch_helper->getBranches();
             
             $renderer->doc .= '<div class="table"><table>';
-            $renderer->doc .=  "<tr><th>Improvement</th><th>Create</th><th>Edit</th><th>Remove</th></tr>";
+            if ($INFO["isadmin"] )
+            {
+                $renderer->doc .=  "<tr><th>Improvement</th><th>Create</th><th>Edit</th><th>Remove</th></tr>";
+            }
+            else
+            {
+                $renderer->doc .=  "<tr><th>Improvement</th><th>Create</th><th>Edit</th></tr>";
+            }
+            
             foreach ($improvements as $improvement)
             {
                 
                 $ip_url = $conf['jira_url'].$improvement["key"];
                 $go_to_branch_url = "/".$improvement["key"]."/doku.php";
-                $create_branch_url = "/master/doku.php?create_branch=".$improvement["key"];
-                $remove_branch_url = "/master/doku.php?remove_branch=".$improvement["key"];
+                $create_branch_url = DOKU_URL."doku.php?create_branch=".$improvement["key"];
+                $remove_branch_url = DOKU_URL."doku.php?remove_branch=".$improvement["key"];
                 
                 $renderer->doc .= "<tr>";
 
@@ -106,7 +123,10 @@ class syntax_plugin_branches_manage extends DokuWiki_Syntax_Plugin {
                     // The improvement has a branch
                     $renderer->doc .= "<td></td>";
                     $renderer->doc .= "<td><a href=\"".$go_to_branch_url."\">Contribute to this initiative</a></td>";
-                    $renderer->doc .= "<td><a href=\"".$remove_branch_url."\">Remove the branch</a></td>";
+                    if ($INFO["isadmin"] )
+                    {                        
+                        $renderer->doc .= "<td><a href=\"".$remove_branch_url."\">Remove the branch</a></td>";
+                    }
                 }
                 else
                 {
