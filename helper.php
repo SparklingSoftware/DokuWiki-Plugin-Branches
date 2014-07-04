@@ -117,7 +117,7 @@ class helper_plugin_branches extends DokuWiki_Plugin {
 
         if ($this->jira === null) return;
         $jql = $conf['plugin']['branches']['jql'];
-        $improvements = $this->jira->getIssues($jql);
+        $improvements = $this->jira->getData($jql);
         return $improvements;
     }
 
