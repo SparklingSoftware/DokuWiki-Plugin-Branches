@@ -80,6 +80,8 @@ class syntax_plugin_branches_select extends DokuWiki_Syntax_Plugin {
             msg('The jiradata plugin could not loaded from the branches plugin (select)', -1);
             return false;
         }
+
+        return true;
     }
     
     /**
