@@ -51,7 +51,7 @@ class helper_plugin_branches extends DokuWiki_Plugin {
       
         // Clone data
         $origin = '"'.dirname(DOKU_INC).DIRECTORY_SEPARATOR.$origin_data.'"';
-        $destination = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$branch_id.'-Data';        
+        $destination = dirname(DOKU_INC).DIRECTORY_SEPARATOR.$branch_id.'-data';        
         if ($debug) msg('Cloning from: '.$origin.' To: '.$destination);  
         $this->git->cloneRepo($origin, $destination);    
 
